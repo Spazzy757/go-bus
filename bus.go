@@ -128,7 +128,7 @@ func (bus *EventBus) process() {
 		case event, more := <-bus.queue:
 			if more {
 				// Calculate the worker ID from the topic name
-				workerId := bus.getWorkerId(event.Id())
+				workerId := bus.getWorkerId(event.Identifier())
 
 				// Get the worker channel
 				bus.lock.RLock()
