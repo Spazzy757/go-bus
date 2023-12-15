@@ -71,6 +71,4 @@ func TestEventBus(t *testing.T) {
 		t.Fail()
 	}
 
-	t.Fail()
-
 }
