@@ -1,3 +1,7 @@
+### Build
+
+[![build](https://github.com/re-cinq/go-bus/actions/workflows/build.yaml/badge.svg)](https://github.com/re-cinq/go-bus/actions/workflows/build.yaml)
+
 ### go-bus
 It's a very simple pub sub implementation for Golang which allows to build an  
 event driven architecture around it, by having handlers subscribing to specific topics and sending events of a specific topic to the bus.  
