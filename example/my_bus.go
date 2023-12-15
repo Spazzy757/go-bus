@@ -4,13 +4,13 @@ import (
 	"runtime"
 
 	"github.com/re-cinq/go-bus"
-	klog "k8s.io/klog/v2"
 )
 
 func main() {
 
 	// Init the bus
-	myBus := bus.NewEventBus(12, runtime.NumCPU(), klog.NewKlogr())
+	myBus := bus.NewEventBus(12, runtime.NumCPU())
+	myBus.Start()
 
 	// Init the handler
 	myHandler := MyEventHandler{}
@@ -26,4 +26,6 @@ func main() {
 		Cpu:    "4",
 		Memory: "64",
 	})
+
+	myBus.Stop()
 }
