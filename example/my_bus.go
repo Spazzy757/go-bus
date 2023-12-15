@@ -19,4 +19,11 @@ func main() {
 	// EmissionsCalculatedTopic will reach this handler
 	// You can have multiple handlers subscribed to the same topic as well
 	myBus.Subscribe(EmissionsCalculatedTopic, &myHandler)
+
+	// Publish an event
+	myBus.Publish(MetericsCollectedEvent{
+		Id:     "my_unique_id",
+		Cpu:    "4",
+		Memory: "64",
+	})
 }
