@@ -1,11 +1,10 @@
 package bus
 
 import (
+	"fmt"
 	"hash/fnv"
 	"sync"
 	"time"
-
-	"k8s.io/klog/v2"
 )
 
 type EventBus struct {
@@ -32,10 +31,20 @@ type EventBus struct {
 
 	// Signaling whether the bus is shutting down, so no more messages will be accepted
 	shutdown bool
+
+	logger Logger
+}
+
+type option func(*EventBus)
+
+func WithLogger(l Logger) option {
+	return func(e *EventBus) {
+		e.logger = l
+	}
 }
 
 // NewEventBus instance
-func NewEventBus(queueSize int, workerPoolSize int) Bus {
+func NewEventBus(queueSize int, workerPoolSize int, opts ...option) Bus {
 
 	// Init the event bus
 	bus := EventBus{
@@ -47,6 +56,11 @@ func NewEventBus(queueSize int, workerPoolSize int) Bus {
 		lock:           sync.RWMutex{},
 		publishLock:    sync.RWMutex{},
 		shutdown:       false,
+	}
+
+	// set any options that might be set
+	for _, o := range opts {
+		o(&bus)
 	}
 
 	// Init the channels and start the workers
@@ -93,15 +107,15 @@ func (bus *EventBus) Stop() {
 	// Unlock
 	bus.publishLock.Unlock()
 
-	klog.Info("bus received shutdown signal")
+	bus.logger.Info("bus received shutdown signal")
 
 	// wait for all the workers to be done processing the poison pill
 	for index, worker := range bus.workers {
 		<-worker.shutdown
-		klog.Infof("worker %d shutdown completed", index)
+		bus.logger.Info(fmt.Sprintf("worker %d shutdown completed", index))
 	}
 
-	klog.Info("event bus shutdown completed")
+	bus.logger.Info("event bus shutdown completed")
 }
 
 // Publish a new event
@@ -158,7 +172,7 @@ func (bus *EventBus) process() {
 			// timeout otherwise to allow the shutdown procedure
 		case <-time.After(1 * time.Minute):
 			// Good for checking if the bus size needs to be increased
-			klog.Infof("messages queued: %d", len(bus.queue))
+			bus.logger.Info(fmt.Sprintf("messages queued: %d", len(bus.queue)))
 		}
 	}
 
